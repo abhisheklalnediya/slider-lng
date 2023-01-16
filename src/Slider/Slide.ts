@@ -20,7 +20,7 @@ export class Slide extends Lightning.Component {
       rect: true,
 
       color: 0xff222222,
-      shader: defShader,
+      shader: { ...defShader },
       Image: {
         w: (w: number) => w,
         h: (h: number) => h,
@@ -60,7 +60,7 @@ export class Slide extends Lightning.Component {
 
   _unfocus() {
     this.patch({
-      shader: defShader,
+      shader: { ...defShader },
       smooth: {
         // @ts-ignore
         scale: 1.0,
