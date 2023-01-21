@@ -24,17 +24,15 @@ export class Slider extends Lightning.Application {
         y: 270,
         mount: 0.5,
         Rows: {
-          x: 10,
+          x: 0,
           y: 100,
           w: 800,
-          h: 370,
         },
       },
     };
   }
 
   _init() {
-    console.log("INIT");
     console.log("INIT", this.rowIndex, this.colIndex);
   }
 

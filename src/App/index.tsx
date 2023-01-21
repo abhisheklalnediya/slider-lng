@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getCards } from "../data/api";
-import { slides as slidesSq } from "../data/slides_square";
-import { slides as slidesLn } from "../data/slides_landscape";
+// import { slides as slidesSq } from "../data/slides_square";
+// import { slides as slidesLn } from "../data/slides_landscape";
 import { Slider, sliderFn } from "../Slider";
 import { SliderSpec } from "../Slider/Slide";
 import styles from "./app.module.scss";
@@ -44,7 +44,7 @@ function App() {
 
   useEffect(() => {
     sliderRef.current = sliderFn(canvasRef);
-  }, [items]);
+  }, []);
 
   return (
     <div className={styles.app}>

@@ -18,12 +18,9 @@ const urls = [
 
 export const getCards = () => {
   const requests = urls.map((url) => axios.get(url));
-  console.log(requests);
-
   return new Promise((resolve) => {
     Promise.all(requests).then((responses) => {
       const data = responses.map((res) => res.data);
-      console.log(data);
       resolve(data);
     });
   });
