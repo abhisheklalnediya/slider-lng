@@ -1,15 +1,17 @@
 import { Lightning } from "@lightningjs/sdk";
 
-export interface SlideSpec {
+export interface ItemSpec {
   label: string;
   src: string;
 }
+
+export type SliderSpec = ItemSpec[];
 
 const defShader = {
   type: Lightning.shaders.RoundedRectangle,
   radius: [50],
   stroke: 10,
-  strokeColor: 0xff222222,
+  strokeColor: 0x00222222,
 };
 
 export class Slide extends Lightning.Component {
@@ -34,8 +36,8 @@ export class Slide extends Lightning.Component {
     };
   }
 
-  set item(obj: SlideSpec) {
-    const { label, src } = obj;
+  set item(obj: ItemSpec) {
+    const { src } = obj;
     this.patch({
       Image: { src },
       //   Label: { text: label.toString() },
@@ -52,9 +54,6 @@ export class Slide extends Lightning.Component {
       smooth: {
         scale: 1.1,
       },
-      //   Label: {
-      //     smooth: { color: 0xffffffff },
-      //   },
     });
   }
 
@@ -65,9 +64,6 @@ export class Slide extends Lightning.Component {
         // @ts-ignore
         scale: 1.0,
       },
-      //   Label: {
-      //     smooth: { color: 0xff000000 },
-      //   },
     });
   }
 }

@@ -1,24 +1,20 @@
 import { Lightning, Utils } from "@lightningjs/sdk";
-import { slides } from "../data/slides";
-import { Slide, SlideSpec } from "./Slide";
+import { slides as sData } from "../data/slides_square";
+import { Row } from "./Row";
+import { Slide, SliderSpec } from "./Slide";
+
+interface FTrack {
+  [index: number]: number;
+}
 
 export class Slider extends Lightning.Application {
-  private index!: number;
-  private itemsCount!: number;
-  private items!: SlideSpec[];
-  constructor(
-    options: Partial<Lightning.Application.Options>,
-    items: SlideSpec[]
-  ) {
-    // _construct() {
-    super(options);
-    // this.itemsCount = 6;
-    console.log("Cons", this.itemsCount, this.index);
-    this.index = 0;
-    this.items = items;
-    this.itemsCount = slides.length;
-    // this._init = this._init.bind(this);
+  rowIndex: number = 0;
+  colIndex: number = 0;
+  focusTrack: FTrack = [];
+  _construct() {
+    console.log("_CONS");
   }
+
   static _template() {
     return {
       Slider: {
@@ -27,68 +23,141 @@ export class Slider extends Lightning.Application {
         x: 480,
         y: 270,
         mount: 0.5,
-        Wrapper: {},
+        Rows: {
+          x: 10,
+          y: 100,
+          w: 800,
+          h: 370,
+        },
       },
     };
   }
 
   _init() {
-    const buttons = slides.map((slide, i) => ({
-      type: Slide,
-      x: i * (331 + 30),
-      item: { label: slide.title, src: slide.imageUrl },
-    }));
-    this.tag("Wrapper").children = buttons;
-    console.log("INIT", this.index, this.itemsCount);
+    console.log("INIT");
+    console.log("INIT", this.rowIndex, this.colIndex);
   }
 
-  repositionWrapper() {
-    console.log("RW", this.index, this.itemsCount);
-    const wrapper = this.tag("Wrapper");
-    const sliderW = this.tag("Slider").w;
-    const currentWrapperX = wrapper.transition("x").targetvalue || wrapper.x;
-    const currentFocus = wrapper.children[this.index];
-    const currentFocusX = currentFocus.x + currentWrapperX;
-    const currentFocusOuterWidth = currentFocus.x + currentFocus.w;
-
-    if (currentFocusX < 0) {
-      wrapper.setSmooth("x", -currentFocus.x);
-    } else if (currentFocusOuterWidth > sliderW) {
-      wrapper.setSmooth("x", sliderW - currentFocusOuterWidth);
+  repositionRow() {
+    this.trackFocus();
+    if (this.currentRow) {
+      const x = this.currentSlide.x;
+      const y = this.currentRow.y - 100;
+      this.currentRow.setSmooth("x", -x);
+      this.container.setSmooth("y", -y);
     }
+
+    // const wrapper = this.tag("Wrapper");
+    // const sliderW = this.tag("Slider").w;
+    // const currentWrapperX = wrapper.transition("x").targetvalue || wrapper.x;
+    // const currentFocus = wrapper.children[this.colIndex];
+    // const currentFocusX = currentFocus.x + currentWrapperX;
+    // const currentFocusOuterWidth = currentFocus.x + currentFocus.w;
+
+    // if (currentFocusX < 0) {
+    //   wrapper.setSmooth("x", -currentFocus.x);
+    // } else if (currentFocusOuterWidth > sliderW) {
+    //   wrapper.setSmooth("x", sliderW - currentFocusOuterWidth);
+    // }
+  }
+
+  _handleUp() {
+    this.rowIndex = this.rowIndex || 0;
+    this.rowIndex -= 1;
+    if (this.rowIndex <= 0) {
+      this.rowIndex = 0;
+    }
+    this.colIndex = this.focusTrack[this.rowIndex] || 0;
+    this.repositionRow();
+  }
+
+  _handleDown() {
+    this.rowIndex = this.rowIndex || 0;
+    this.rowIndex += 1;
+    if (this.rowIndex >= this.rows.length) {
+      this.rowIndex = this.rows.length - 1;
+    }
+    this.colIndex = this.focusTrack[this.rowIndex] || 0;
+    this.repositionRow();
   }
 
   _handleLeft() {
-    this.index -= 1;
-    if (this.index <= 0) {
-      this.index = 0;
+    this.colIndex -= 1;
+    if (this.colIndex <= 0) {
+      this.colIndex = 0;
     }
-    this.repositionWrapper();
+    this.repositionRow();
   }
 
   _handleRight() {
-    console.log(this.index, this.itemsCount);
-    this.index += 1;
-    if (this.index >= this.itemsCount) {
-      this.index = this.itemsCount - 1;
+    this.colIndex = this.colIndex || 0;
+    this.colIndex += 1;
+    const slidesLen = this.currentRow.children.length;
+    if (this.colIndex >= slidesLen) {
+      this.colIndex = slidesLen - 1;
     }
-    this.repositionWrapper();
+    this.repositionRow();
+  }
+
+  addRow(rowData: SliderSpec[]) {
+    let rows = rowData.map((slider, si) => {
+      const slides = slider.map((slide, i) => ({
+        type: Slide,
+        x: i * (370 + 30),
+        item: { label: slide.label, src: slide.src },
+      }));
+
+      const row = {
+        type: Row,
+        y: si * (370 + 30),
+        children: slides,
+      };
+      return row;
+    });
+    this.tag(`Rows`).children = rows;
+
+    this._refocus();
+    console.log("Patched");
+  }
+
+  trackFocus() {
+    this.focusTrack[this.rowIndex] = this.colIndex;
+  }
+
+  get container() {
+    const rows = this.tag("Rows");
+    return rows;
+  }
+
+  get rows() {
+    const rows = this.tag("Rows");
+    return rows && rows.children;
+  }
+
+  get currentRow() {
+    return this.rows && this.rows[this.rowIndex];
+  }
+
+  get currentSlide() {
+    return (
+      this.rows &&
+      this.rows[this.rowIndex] &&
+      this.rows[this.rowIndex].children &&
+      this.rows[this.rowIndex].children[this.colIndex]
+    );
   }
 
   _getFocused() {
-    return this.tag("Slider.Wrapper").children[this.index];
+    return this.currentSlide;
   }
 }
 
-export const sliderFn = (
-  ref: React.RefObject<HTMLCanvasElement>,
-  items: SlideSpec[]
-) => {
-  console.log("Slider", ref.current);
+export const sliderFn = (ref: React.RefObject<HTMLCanvasElement>) => {
   const options = {
     debug: false,
     stage: { canvas: ref.current, clearColor: 0xff000000 },
   };
-  const app = new Slider(options, items);
+  const app = new Slider(options);
+  return app;
   // document.body.appendChild(app.stage.getCanvas());
 };
