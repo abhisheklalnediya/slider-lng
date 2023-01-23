@@ -1,11 +1,5 @@
 import { Lightning } from "@lightningjs/sdk";
-
-export interface ItemSpec {
-  label: string;
-  src: string;
-}
-
-export type SliderSpec = ItemSpec[];
+import { ItemSpec } from ".";
 
 const defShader = {
   type: Lightning.shaders.RoundedRectangle,
@@ -14,11 +8,17 @@ const defShader = {
   strokeColor: 0x00222222,
 };
 
-export class Slide extends Lightning.Component {
+export const squareGSpec = {
+  w: 331,
+  h: 361,
+  m: 30,
+};
+
+export class Square extends Lightning.Component {
   static _template() {
     return {
-      w: 331,
-      h: 361,
+      w: squareGSpec.w,
+      h: squareGSpec.h,
       rect: true,
 
       color: 0xff222222,
@@ -27,12 +27,6 @@ export class Slide extends Lightning.Component {
         w: (w: number) => w,
         h: (h: number) => h,
       },
-      //   Label: {
-      //     x: 10,
-      //     y: 302,
-      //     color: 0xff000000,
-      //     text: { fontSize: 32 },
-      //   },
     };
   }
 
@@ -40,13 +34,11 @@ export class Slide extends Lightning.Component {
     const { src } = obj;
     this.patch({
       Image: { src },
-      //   Label: { text: label.toString() },
     });
   }
 
   _focus() {
     this.patch({
-      // @ts-ignore
       shader: {
         ...defShader,
         strokeColor: 0xff05cedd,
@@ -61,7 +53,6 @@ export class Slide extends Lightning.Component {
     this.patch({
       shader: { ...defShader },
       smooth: {
-        // @ts-ignore
         scale: 1.0,
       },
     });

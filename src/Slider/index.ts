@@ -1,7 +1,9 @@
-import { Lightning, Utils } from "@lightningjs/sdk";
-import { slides as sData } from "../data/slides_square";
+import { Lightning } from "@lightningjs/sdk";
+import { Hero, heroGSpec } from "./Slide/Hero";
 import { Row } from "./Row";
-import { Slide, SliderSpec } from "./Slide";
+import { SliderSpec } from "./Slide";
+import { Square, squareGSpec } from "./Slide/Square";
+import { Rectangle, rectangleGSpec } from "./Slide/Rectangle";
 
 interface FTrack {
   [index: number]: number;
@@ -20,12 +22,12 @@ export class Slider extends Lightning.Application {
       Slider: {
         w: 800,
         h: 350,
-        x: 480,
-        y: 270,
+        x: 380,
+        y: 150,
         mount: 0.5,
         Rows: {
           x: 0,
-          y: 100,
+          y: 0,
           w: 800,
         },
       },
@@ -39,8 +41,9 @@ export class Slider extends Lightning.Application {
   repositionRow() {
     this.trackFocus();
     if (this.currentRow) {
-      const x = this.currentSlide.x;
-      const y = this.currentRow.y - 100;
+      const isHero = this.rowIndex === 0;
+      const x = isHero ? this.currentSlide.x : this.currentSlide.x - 100;
+      const y = isHero ? 0 : this.currentRow.y - 250;
       this.currentRow.setSmooth("x", -x);
       this.container.setSmooth("y", -y);
     }
@@ -98,16 +101,31 @@ export class Slider extends Lightning.Application {
   }
 
   addRow(rowData: SliderSpec[]) {
+    const rTops = [0];
     let rows = rowData.map((slider, si) => {
+      const heroW = heroGSpec.w + heroGSpec.m;
+      const heroH = heroGSpec.h;
+
+      const slideGSpec = si % 2 ? rectangleGSpec : squareGSpec;
+
+      const Slide = si % 2 ? Rectangle : Square;
+
+      const slideW = slideGSpec.w + slideGSpec.m;
+      const slideH = slideGSpec.h + slideGSpec.m;
+
+      const slideWidth = si === 0 ? heroW : slideW;
+      const rowHeight = si === 0 ? heroH - 250 : slideH;
+      const leftPadding = si === 0 ? 0 : 100;
       const slides = slider.map((slide, i) => ({
-        type: Slide,
-        x: i * (370 + 30),
+        type: si === 0 ? Hero : Slide,
+        x: i * slideWidth + leftPadding,
         item: { label: slide.label, src: slide.src },
       }));
-
+      const rY = rTops[rTops.length - 1];
+      rTops.push(rY + rowHeight);
       const row = {
         type: Row,
-        y: si * (370 + 30),
+        y: rY,
         children: slides,
       };
       return row;

@@ -4,6 +4,7 @@ import { getCards } from "../data/api";
 // import { slides as slidesLn } from "../data/slides_landscape";
 import { Slider, sliderFn } from "../Slider";
 import { SliderSpec } from "../Slider/Slide";
+
 import styles from "./app.module.scss";
 
 // const slidesSqData: SliderSpec = slidesSq.map((s) => ({
