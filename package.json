@@ -35,12 +35,15 @@
   "browserslist": {
     "production": [
       ">0.2%",
-      "ie 10"
+      "not dead"
     ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "react-app-polyfill": "^3.0.0"
   }
 }
